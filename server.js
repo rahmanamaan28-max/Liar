@@ -70,6 +70,7 @@ io.on('connection', (socket) => {
     game.players.forEach(p => {
       game.scores[p.id] = 0;
     });
+    game.isFinalRound = false;
 
     io.to(room).emit('gameStarted');
     startRound(room);
@@ -101,6 +102,26 @@ io.on('connection', (socket) => {
     }
   });
 
+  // New restart game handler
+  socket.on('restartGame', () => {
+    const room = getRoom(socket);
+    const game = rooms[room];
+    
+    if (!game || game.host !== socket.id) return;
+    
+    // Reset game state
+    game.scores = {};
+    game.players.forEach(p => {
+      game.scores[p.id] = 0;
+    });
+    game.round = 1;
+    game.isFinalRound = false;
+    
+    // Notify clients
+    io.to(room).emit('newGameStarted');
+    startRound(room);
+  });
+
   function tallyVotes(game, room) {
     const counts = {};
     Object.values(game.votes).forEach(id => {
@@ -119,6 +140,7 @@ io.on('connection', (socket) => {
     const imposterId = game.imposter;
     const imposterCaught = mostVotedId === imposterId;
     
+    // Award points
     game.players.forEach(p => {
       if (game.votes[p.id] === imposterId) {
         game.scores[p.id] = (game.scores[p.id] || 0) + 1;
@@ -129,13 +151,32 @@ io.on('connection', (socket) => {
       game.scores[imposterId] = (game.scores[imposterId] || 0) + 2;
     }
 
-    io.to(room).emit('showScores', game.players.map(p => ({
-      name: p.name,
-      score: game.scores[p.id] || 0
-    })));
-
+    // Check if this is the final round
+    const isFinalRound = game.round >= game.settings.rounds;
+    
+    // Find winner for final round
+    let winner = { name: '', score: -1 };
+    if (isFinalRound) {
+      game.players.forEach(p => {
+        if (game.scores[p.id] > winner.score) {
+          winner = { name: p.name, score: game.scores[p.id] };
+        }
+      });
+    }
+    
+    io.to(room).emit('showScores', {
+      scores: game.players.map(p => ({ 
+        name: p.name, 
+        score: game.scores[p.id] || 0 
+      })),
+      isFinalRound,
+      winner
+    });
+    
     game.round++;
-    if (game.round <= game.settings.rounds) {
+    
+    // Start next round only if not final
+    if (!isFinalRound) {
       setTimeout(() => startRound(room), 5000);
     }
   }

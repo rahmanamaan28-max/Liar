@@ -4,106 +4,171 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Guess Who Is Lying - Multiplayer</title>
-  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+      color: #333;
+    }
+    #game-container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    #question-box, #answers-table, #discussion-box, #vote-box, #scoreboard {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+    }
+    #answerInput, #discussionInput {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    #submitAnswer, #submitDiscussion, #submitVote {
+      padding: 12px 24px;
+      margin-top: 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    #submitAnswer:hover, #submitDiscussion:hover, #submitVote:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    #timer {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #e74c3c;
+    }
+    #discussionMessages {
+      height: 150px;
+      overflow: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      background: white;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      margin: 5px 0;
+    }
+    #hostControls input {
+      width: 60px;
+    }
+  </style>
 </head>
 <body>
   <div id="game-container">
     <h2>Guess Who Is Lying</h2>
 
     <div id="join-screen">
-      <div class="input-group">
-        <input type="text" id="playerName" placeholder="Enter your name" maxlength="15" />
-      </div>
-      <div class="input-group">
-        <input type="text" id="roomCode" placeholder="Enter room code" maxlength="4" />
-      </div>
-      <div class="button-group">
-        <button id="joinBtn" class="btn primary">Join Game</button>
-        <button id="createBtn" class="btn secondary">Create Game</button>
-      </div>
-      <div id="error-message" class="error"></div>
+      <input type="text" id="playerName" placeholder="Enter your name" />
+      <input type="text" id="roomCode" placeholder="Enter room code" />
+      <button id="joinBtn">Join Game</button>
+      <button id="createBtn">Create Game</button>
     </div>
 
     <div id="lobby-screen" class="hidden">
       <h3>Lobby - Room: <span id="roomDisplay"></span></h3>
-      <p id="lobby-status">Waiting for host to start the game...</p>
-      <div class="player-list-container">
-        <h4>Players:</h4>
-        <ul id="playerList"></ul>
-      </div>
+      <p>Waiting for host to start the game...</p>
+      <ul id="playerList"></ul>
       <div id="hostControls" class="hidden">
-        <h4>Game Settings</h4>
-        <div class="settings-group">
-          <label>Answer Time (s): <input type="number" id="answerTime" value="30" min="10" max="120" /></label>
-        </div>
-        <div class="settings-group">
-          <label>Discussion Time (s): <input type="number" id="discussionTime" value="45" min="15" max="180" /></label>
-        </div>
-        <div class="settings-group">
-          <label>Vote Time (s): <input type="number" id="voteTime" value="30" min="10" max="60" /></label>
-        </div>
-        <div class="settings-group">
-          <label>Rounds: <input type="number" id="rounds" value="5" min="1" max="10" /></label>
-        </div>
-        <button id="startGame" class="btn primary">Start Game</button>
+        <label>Answer Time (s): <input type="number" id="answerTime" value="30" min="10" max="120" /></label><br>
+        <label>Discussion Time (s): <input type="number" id="discussionTime" value="30" min="10" max="120" /></label><br>
+        <label>Vote Time (s): <input type="number" id="voteTime" value="30" min="10" max="120" /></label><br>
+        <label>Rounds: <input type="number" id="rounds" value="5" min="1" max="10" /></label><br>
+        <button id="startGame">Start Game</button>
       </div>
     </div>
 
     <div id="game-screen" class="hidden">
-      <div class="game-header">
-        <h3>Round: <span id="roundNum"></span>/<span id="totalRounds"></span></h3>
-        <div id="timer" class="timer">Time left: <span id="timeLeft">0</span>s</div>
-      </div>
+      <h3>Round: <span id="roundNum"></span></h3>
+      <div id="timer">Time left: <span id="timeLeft">0</span>s</div>
 
-      <div id="question-box" class="game-section">
+      <div id="question-box">
         <h4>Question:</h4>
-        <p id="displayQuestion" class="question-text"></p>
+        <p id="displayQuestion"></p>
       </div>
 
-      <div id="answer-box" class="game-section">
-        <input type="text" id="answerInput" placeholder="Type your answer..." maxlength="50" />
-        <button id="submitAnswer" class="btn primary">Submit Answer</button>
+      <div id="answer-box">
+        <input type="text" id="answerInput" placeholder="Type your answer..." />
+        <button id="submitAnswer">Submit Answer</button>
       </div>
 
-      <div id="answers-table" class="game-section hidden">
+      <div id="answers-table" class="hidden">
         <h4>Answers:</h4>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Player</th><th>Answer</th></tr>
-            </thead>
-            <tbody id="answersBody"></tbody>
-          </table>
-        </div>
+        <table>
+          <thead>
+            <tr><th>Player</th><th>Answer</th></tr>
+          </thead>
+          <tbody id="answersBody"></tbody>
+        </table>
       </div>
 
-      <div id="discussion-box" class="game-section hidden">
+      <div id="discussion-box" class="hidden">
         <h4>Discussion:</h4>
-        <div id="discussionMessages" class="chat-box"></div>
-        <div class="chat-input">
-          <input type="text" id="discussionInput" placeholder="Type your message..." maxlength="100" />
-          <button id="submitDiscussion" class="btn primary">Send</button>
-        </div>
+        <div id="discussionMessages"></div>
+        <input type="text" id="discussionInput" placeholder="Type your message..." />
+        <button id="submitDiscussion">Send</button>
       </div>
 
-      <div id="vote-box" class="game-section hidden">
+      <div id="vote-box" class="hidden">
         <h4>Vote: Who is the imposter?</h4>
-        <div id="voteOptions" class="vote-options"></div>
-        <button id="submitVote" class="btn primary">Submit Vote</button>
+        <div id="voteOptions"></div>
+        <button id="submitVote">Submit Vote</button>
       </div>
 
-      <div id="scoreboard" class="game-section hidden">
+      <div id="scoreboard" class="hidden">
         <h4>Scoreboard</h4>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Rank</th><th>Player</th><th>Score</th></tr>
-            </thead>
-            <tbody id="scoreboardBody"></tbody>
-          </table>
-        </div>
-        <div id="round-result" class="result-message"></div>
-        <button id="nextRoundBtn" class="btn primary hidden">Continue</button>
+        <table>
+          <thead>
+            <tr><th>Player</th><th>Score</th></tr>
+          </thead>
+          <tbody id="scoreboardBody"></tbody>
+        </table>
       </div>
     </div>
   </div>

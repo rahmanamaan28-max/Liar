@@ -12,31 +12,11 @@
     "fake": "What color is your shoes?"
   },
   {
+    "real": "What's your dream vacation destination?",
+    "fake": "What's your dream car?"
+  },
+  {
     "real": "What was your first pet's name?",
-    "fake": "What was your first car's make?"
-  },
-  {
-    "real": "What's your dream job?",
-    "fake": "What's your worst nightmare?"
-  },
-  {
-    "real": "What's your favorite season?",
-    "fake": "What's your favorite planet?"
-  },
-  {
-    "real": "What's your go-to karaoke song?",
-    "fake": "What's your go-to dance move?"
-  },
-  {
-    "real": "What's your favorite board game?",
-    "fake": "What's your favorite video game?"
-  },
-  {
-    "real": "What's your favorite ice cream flavor?",
-    "fake": "What's your favorite pizza topping?"
-  },
-  {
-    "real": "What's your most used emoji?",
-    "fake": "What's your most used app?"
+    "fake": "What was your first teacher's name?"
   }
 ]

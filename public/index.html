@@ -5,99 +5,299 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Guess Who Is Lying - Multiplayer</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      padding: 20px;
-      color: #333;
-    }
-    #game-container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    }
-    h2, h3 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    #question-box, #answers-table, #discussion-box, #vote-box, #scoreboard {
-      margin-top: 25px;
-      padding: 15px;
-      border-radius: 8px;
-      background-color: #f8f9fa;
-    }
-    #answerInput, #discussionInput {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    #submitAnswer, #submitDiscussion, #submitVote {
-      padding: 12px 24px;
-      margin-top: 15px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-    #submitAnswer:hover, #submitDiscussion:hover, #submitVote:hover {
-      background-color: #2980b9;
-    }
-    button:disabled {
-      background-color: #95a5a6;
-      cursor: not-allowed;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    th, td {
-      padding: 12px;
-      text-align: center;
-    }
-    .hidden {
-      display: none;
-    }
-    #timer {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin: 15px 0;
-      color: #e74c3c;
-    }
-    #discussionMessages {
-      height: 150px;
-      overflow: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 4px;
-      background: white;
-      margin-bottom: 10px;
-    }
-    input[type="text"] {
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin: 5px 0;
-    }
-    #hostControls input {
-      width: 60px;
-    }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    padding: 20px;
+    color: #333;
+  }
+  #game-container {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  h2, h3 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  #question-box, #answers-table, #discussion-box, #vote-box, #scoreboard {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
+  #answerInput, #discussionInput {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  #submitAnswer, #submitDiscussion, #submitVote {
+    padding: 12px 24px;
+    margin-top: 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  #submitAnswer:hover, #submitDiscussion:hover, #submitVote:hover {
+    background-color: #2980b9;
+  }
+  button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  th, td {
+    padding: 12px;
+    text-align: center;
+  }
+  .hidden {
+    display: none;
+  }
+  #timer {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #e74c3c;
+  }
+  #discussionMessages {
+    height: 150px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    background: white;
+    margin-bottom: 10px;
+  }
+  #discussionMessages p {
+    margin: 5px 0;
+    padding: 8px;
+    background: #e3f2fd;
+    border-radius: 4px;
+  }
+  #discussionMessages p:nth-child(even) {
+    background: #f5f5f5;
+  }
+  #join-screen input, #lobby-screen input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  #join-screen button, #lobby-screen button {
+    width: 48%;
+    padding: 12px;
+    margin: 5px 1%;
+    border: none;
+    border-radius: 4px;
+    background-color: #2ecc71;
+    color: white;
+    cursor: pointer;
+  }
+  #join-screen button:hover, #lobby-screen button:hover {
+    background-color: #27ae60;
+  }
+  #hostControls {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  #hostControls label {
+    display: block;
+    margin: 10px 0;
+  }
+  #playerList {
+    list-style: none;
+    padding: 0;
+  }
+  #playerList li {
+    padding: 10px;
+    background: white;
+    border: 1px solid #eee;
+    margin: 5px 0;
+    border-radius: 4px;
+  }
+  #voteOptions label {
+    display: block;
+    padding: 8px;
+    margin: 5px 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  #voteOptions input[type="radio"] {
+    margin-right: 10px;
+  }
+  </style><style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    padding: 20px;
+    color: #333;
+  }
+  #game-container {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  h2, h3 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  #question-box, #answers-table, #discussion-box, #vote-box, #scoreboard {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
+  #answerInput, #discussionInput {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  #submitAnswer, #submitDiscussion, #submitVote {
+    padding: 12px 24px;
+    margin-top: 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  #submitAnswer:hover, #submitDiscussion:hover, #submitVote:hover {
+    background-color: #2980b9;
+  }
+  button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  th, td {
+    padding: 12px;
+    text-align: center;
+  }
+  .hidden {
+    display: none;
+  }
+  #timer {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #e74c3c;
+  }
+  #discussionMessages {
+    height: 150px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    background: white;
+    margin-bottom: 10px;
+  }
+  #discussionMessages p {
+    margin: 5px 0;
+    padding: 8px;
+    background: #e3f2fd;
+    border-radius: 4px;
+  }
+  #discussionMessages p:nth-child(even) {
+    background: #f5f5f5;
+  }
+  #join-screen input, #lobby-screen input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  #join-screen button, #lobby-screen button {
+    width: 48%;
+    padding: 12px;
+    margin: 5px 1%;
+    border: none;
+    border-radius: 4px;
+    background-color: #2ecc71;
+    color: white;
+    cursor: pointer;
+  }
+  #join-screen button:hover, #lobby-screen button:hover {
+    background-color: #27ae60;
+  }
+  #hostControls {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  #hostControls label {
+    display: block;
+    margin: 10px 0;
+  }
+  #playerList {
+    list-style: none;
+    padding: 0;
+  }
+  #playerList li {
+    padding: 10px;
+    background: white;
+    border: 1px solid #eee;
+    margin: 5px 0;
+    border-radius: 4px;
+  }
+  #voteOptions label {
+    display: block;
+    padding: 8px;
+    margin: 5px 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  #voteOptions input[type="radio"] {
+    margin-right: 10px;
+  }
   </style>
 </head>
 <body>

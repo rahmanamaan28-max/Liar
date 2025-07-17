@@ -1,0 +1,42 @@
+[
+  {
+    "real": "What's your favorite fruit?",
+    "fake": "What's your favorite vegetable?"
+  },
+  {
+    "real": "Name a city you'd love to visit.",
+    "fake": "Name a food you'd love to eat."
+  },
+  {
+    "real": "What color is your toothbrush?",
+    "fake": "What color is your shoes?"
+  },
+  {
+    "real": "What was your first pet's name?",
+    "fake": "What was your first car's make?"
+  },
+  {
+    "real": "What's your dream job?",
+    "fake": "What's your worst nightmare?"
+  },
+  {
+    "real": "What's your favorite season?",
+    "fake": "What's your favorite planet?"
+  },
+  {
+    "real": "What's your go-to karaoke song?",
+    "fake": "What's your go-to dance move?"
+  },
+  {
+    "real": "What's your favorite board game?",
+    "fake": "What's your favorite video game?"
+  },
+  {
+    "real": "What's your favorite ice cream flavor?",
+    "fake": "What's your favorite pizza topping?"
+  },
+  {
+    "real": "What's your most used emoji?",
+    "fake": "What's your most used app?"
+  }
+]

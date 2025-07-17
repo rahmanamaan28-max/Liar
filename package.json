@@ -1,0 +1,15 @@
+{
+  "name": "guess-who-is-lying",
+  "version": "1.0.0",
+  "description": "Multiplayer game where players guess who is lying. Built with Node.js and Socket.IO.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5"
+  }
+}

@@ -25,7 +25,28 @@
       <h2>Lobby: <span id="roomDisplay"></span></h2>
       <p>Waiting for host to start the game...</p>
       <ul id="playerList"></ul>
+      
       <div id="hostControls" class="hidden">
+        <h3>Game Settings</h3>
+        <form id="settings-form">
+          <div class="form-group">
+            <label for="rounds">Rounds:</label>
+            <input type="number" id="rounds" min="3" max="10" value="5">
+          </div>
+          <div class="form-group">
+            <label for="answerTime">Answer Time (sec):</label>
+            <input type="number" id="answerTime" min="10" max="120" value="30">
+          </div>
+          <div class="form-group">
+            <label for="discussionTime">Discussion Time (sec):</label>
+            <input type="number" id="discussionTime" min="10" max="180" value="45">
+          </div>
+          <div class="form-group">
+            <label for="voteTime">Vote Time (sec):</label>
+            <input type="number" id="voteTime" min="10" max="120" value="30">
+          </div>
+          <button type="submit">Update Settings</button>
+        </form>
         <button id="startGame">Start Game</button>
       </div>
     </div>

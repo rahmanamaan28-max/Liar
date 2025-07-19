@@ -207,6 +207,7 @@ socket.on('gameError', (message) => {
 });
 
 socket.on('gameStarted', (players) => {
+  joinScreen.classList.add('hidden'); // FIX: Hide join screen for all
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   minPlayersWarning.classList.add('hidden');
@@ -260,8 +261,8 @@ socket.on('revealAnswers', (data) => {
   // Clear chat
   chatMessages.innerHTML = '';
   
-  // Start timer for discussion phase
-  startTimer(10);
+  // Start timer for discussion phase - FIX: Use actual discussion time
+  startTimer(data.time);
 });
 
 socket.on('chatMessage', (message) => {
@@ -389,7 +390,7 @@ function showLobby(roomCode) {
   joinScreen.classList.add('hidden');
   lobbyScreen.classList.remove('hidden');
   roomDisplay.textContent = roomCode;
-  floatingScoreboard.classList.remove('hidden');
+  floatingScoreboard.classList.remove('hidden'); // FIX: Show scoreboard for all
 }
 
 function updatePlayerList(players) {
@@ -453,4 +454,4 @@ function showNotification(message, type) {
   setTimeout(() => {
     document.body.removeChild(notification);
   }, 3000);
-  }
+}

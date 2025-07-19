@@ -29,6 +29,52 @@
         <button id="startGame">Start Game</button>
       </div>
     </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="hidden">
+      <h2>Round <span id="round-number">1</span></h2>
+      <div id="timer">Time left: <span id="time-left">30</span>s</div>
+      
+      <div id="question-container" class="hidden">
+        <h3>Question:</h3>
+        <p id="question-text"></p>
+        <div id="answer-form">
+          <input type="text" id="answer-input" placeholder="Your answer...">
+          <button id="submit-answer">Submit Answer</button>
+        </div>
+      </div>
+      
+      <div id="answers-container" class="hidden">
+        <h3>Answers:</h3>
+        <ul id="answers-list"></ul>
+      </div>
+      
+      <div id="voting-container" class="hidden">
+        <h3>Who is the imposter?</h3>
+        <ul id="vote-options"></ul>
+        <button id="submit-vote">Submit Vote</button>
+      </div>
+      
+      <div id="results-container" class="hidden">
+        <h3>Round Results:</h3>
+        <p id="imposter-result"></p>
+        <p id="score-update"></p>
+        <div id="next-round-container">
+          <p>Next round starting in <span id="next-round-timer">5</span> seconds...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="hidden">
+      <h2>Game Over!</h2>
+      <h3>Winner: <span id="winner-name"></span> with <span id="winner-score"></span> points!</h3>
+      <div class="scoreboard">
+        <h3>Final Scores:</h3>
+        <ul id="final-scores"></ul>
+      </div>
+      <button id="play-again">Play Again</button>
+    </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

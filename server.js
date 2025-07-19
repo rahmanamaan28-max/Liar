@@ -59,7 +59,6 @@ io.on('connection', (socket) => {
     roomCode = roomCode.toUpperCase();
     const room = rooms[roomCode];
     
-    // FIXED: Added detailed error handling for join issues
     if (!room) {
       socket.emit('joinError', 'Room not found');
       console.log(`Room not found: ${roomCode}`);
@@ -114,13 +113,16 @@ io.on('connection', (socket) => {
     if (!socket.roomCode) return;
     const room = rooms[socket.roomCode];
     
-    if (room && room.host === socket.id) {
+    if (room && room.host === socket.id && room.players.length >= 3) {
       room.status = 'playing';
       room.currentRound = 1;
       startRound(socket.roomCode);
       console.log(`Game started in ${socket.roomCode}`);
     } else {
       console.log(`Start game failed for ${socket.roomCode} by ${socket.id}`);
+      if (room.players.length < 3) {
+        socket.emit('gameError', 'Need at least 3 players to start');
+      }
     }
   });
 
@@ -197,20 +199,24 @@ io.on('connection', (socket) => {
     console.log('❌ User disconnected:', socket.id);
     // Clean up rooms
     for (const [code, room] of Object.entries(rooms)) {
-      room.players = room.players.filter(p => p.id !== socket.id);
+      const playerIndex = room.players.findIndex(p => p.id === socket.id);
       
-      if (room.players.length === 0) {
-        delete rooms[code];
-        console.log(`Room deleted: ${code}`);
-      } else if (room.host === socket.id) {
-        // Assign new host
-        room.host = room.players[0].id;
-        io.to(code).emit('roomUpdated', {
-          players: room.players,
-          settings: room.settings,
-          chat: room.chat
-        });
-        console.log(`New host assigned in room ${code}: ${room.host}`);
+      if (playerIndex !== -1) {
+        room.players.splice(playerIndex, 1);
+        
+        if (room.players.length === 0) {
+          delete rooms[code];
+          console.log(`Room deleted: ${code}`);
+        } else if (room.host === socket.id) {
+          // Assign new host
+          room.host = room.players[0].id;
+          io.to(code).emit('roomUpdated', {
+            players: room.players,
+            settings: room.settings,
+            chat: room.chat
+          });
+          console.log(`New host assigned in room ${code}: ${room.host}`);
+        }
       }
     }
   });

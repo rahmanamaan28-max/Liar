@@ -42,7 +42,8 @@ io.on('connection', (socket) => {
     
     socket.join(roomCode);
     socket.emit('roomCreated', roomCode);
-    console.log(`Room created: ${roomCode}`);
+    io.to(roomCode).emit('playerJoined', rooms[roomCode].players); // FIX: Send player list
+    console.log(`Room created: ${roomCode} by ${name}`);
   });
 
   socket.on('joinRoom', ({ name, roomCode }) => {
@@ -66,6 +67,8 @@ io.on('connection', (socket) => {
       room.currentRound = 1;
       startRound(roomCode);
       console.log(`Game started in ${roomCode}`);
+    } else {
+      console.log(`Start game failed for ${roomCode} by ${socket.id}`);
     }
   });
 
@@ -110,6 +113,7 @@ io.on('connection', (socket) => {
         // Assign new host
         room.host = room.players[0].id;
         io.to(code).emit('updatePlayers', room.players);
+        console.log(`New host assigned in room ${code}: ${room.host}`);
       }
     }
   });

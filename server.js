@@ -59,19 +59,40 @@ io.on('connection', (socket) => {
     roomCode = roomCode.toUpperCase();
     const room = rooms[roomCode];
     
-    if (room && room.status === 'lobby') {
-      room.players.push({ id: socket.id, name, score: 0 });
-      socket.join(roomCode);
-      socket.roomCode = roomCode;
-      io.to(roomCode).emit('roomUpdated', {
-        players: room.players,
-        settings: room.settings,
-        chat: room.chat
-      });
-      console.log(`${name} joined ${roomCode}`);
-    } else {
-      socket.emit('joinError', room ? 'Game already started' : 'Room not found');
+    // FIXED: Added detailed error handling for join issues
+    if (!room) {
+      socket.emit('joinError', 'Room not found');
+      console.log(`Room not found: ${roomCode}`);
+      return;
     }
+    
+    if (room.status !== 'lobby') {
+      socket.emit('joinError', 'Game already started');
+      console.log(`Game already started in ${roomCode}`);
+      return;
+    }
+    
+    // Check if player name is already in room
+    const playerExists = room.players.some(player => player.name === name);
+    if (playerExists) {
+      socket.emit('joinError', 'Name already taken in this room');
+      console.log(`Name taken: ${name} in ${roomCode}`);
+      return;
+    }
+    
+    // Add player to room
+    room.players.push({ id: socket.id, name, score: 0 });
+    socket.join(roomCode);
+    socket.roomCode = roomCode;
+    
+    // Notify room about new player
+    io.to(roomCode).emit('roomUpdated', {
+      players: room.players,
+      settings: room.settings,
+      chat: room.chat
+    });
+    
+    console.log(`${name} joined ${roomCode}`);
   });
 
   socket.on('updateSettings', (newSettings) => {

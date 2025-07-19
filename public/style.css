@@ -359,6 +359,53 @@ button:hover {
   margin-top: 5px;
 }
 
+/* Add to existing styles */
+.mute-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.mute-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+.mute-btn.muted {
+  opacity: 0.7;
+  background: rgba(255, 200, 200, 0.8);
+}
+
+/* Sound wave animation for unmuted state */
+.mute-btn:not(.muted)::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(67, 97, 238, 0.3);
+  animation: soundWave 1.5s infinite;
+  z-index: -1;
+}
+
+@keyframes soundWave {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
 /* Enhanced error message */
 #error-message {
   background-color: #ffebee;

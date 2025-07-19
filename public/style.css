@@ -321,6 +321,63 @@ button:hover {
   color: var(--primary);
 }
 
+/* Loading indicator */
+#loading-indicator {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary);
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--secondary);
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--light-gray);
+  border-radius: var(--border-radius);
+  font-size: 16px;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-top: 5px;
+}
+
+/* Enhanced error message */
+#error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-top: 20px;
+  border-left: 4px solid #c62828;
+}
+
 @keyframes fadeInOut {
   0% { opacity: 0; top: 10px; }
   10% { opacity: 1; top: 20px; }

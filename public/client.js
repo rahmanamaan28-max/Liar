@@ -68,6 +68,7 @@ function joinRoom() {
 
 function startGame() {
   socket.emit('startGame', myRoom);
+  console.log("Starting game for room:", myRoom);
 }
 
 function submitAnswer() {
@@ -104,6 +105,7 @@ socket.on('roomCreated', (roomCode) => {
   showLobby(roomCode);
   isHost = true;
   hostControls.classList.remove('hidden');
+  console.log("Room created:", roomCode);
 });
 
 socket.on('playerJoined', (players) => {
@@ -118,6 +120,7 @@ socket.on('gameStarted', (players) => {
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   updatePlayerList(players);
+  console.log("Game started!");
 });
 
 socket.on('roundStart', (data) => {
@@ -279,26 +282,10 @@ function showNotification(message, type) {
   notification.className = `notification ${type}`;
   notification.textContent = message;
   
-  // Position at top center
-  notification.style.position = 'fixed';
-  notification.style.top = '20px';
-  notification.style.left = '50%';
-  notification.style.transform = 'translateX(-50%)';
-  notification.style.padding = '10px 20px';
-  notification.style.background = type === 'success' ? '#4CAF50' : '#F44336';
-  notification.style.color = 'white';
-  notification.style.borderRadius = '4px';
-  notification.style.zIndex = '1000';
-  notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-  
   document.body.appendChild(notification);
   
-  // Remove after delay
+  // Remove after animation completes
   setTimeout(() => {
-    notification.style.opacity = '0';
-    notification.style.transition = 'opacity 0.5s';
-    setTimeout(() => {
-      document.body.removeChild(notification);
-    }, 500);
+    document.body.removeChild(notification);
   }, 3000);
 }

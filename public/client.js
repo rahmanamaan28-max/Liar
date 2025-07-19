@@ -49,6 +49,7 @@ const chatContainer = document.getElementById('chat-container');
 const floatingScoreboard = document.getElementById('floating-scoreboard');
 const floatingScores = document.getElementById('floating-scores');
 const loadingIndicator = document.getElementById('loading-indicator');
+const minPlayersWarning = document.getElementById('min-players-warning');
 
 // Event Listeners
 document.getElementById('createBtn').addEventListener('click', createRoom);
@@ -78,6 +79,7 @@ function createRoom() {
     };
     
     socket.emit('createRoom', { name: myName, settings });
+    loadingIndicator.classList.remove('hidden');
   } else {
     showError("Please enter your name");
   }
@@ -87,7 +89,6 @@ function joinRoom() {
   myName = playerNameInput.value.trim();
   myRoom = roomCodeInput.value.trim().toUpperCase();
   
-  // FIXED: Added validation and loading indicator
   if (!myName) {
     showError("Please enter your name");
     return;
@@ -100,6 +101,7 @@ function joinRoom() {
   
   // Show loading indicator
   loadingIndicator.classList.remove('hidden');
+  minPlayersWarning.classList.add('hidden');
   
   socket.emit('joinRoom', { name: myName, roomCode: myRoom });
 }
@@ -173,6 +175,7 @@ socket.on('roomCreated', (roomCode) => {
   isHost = true;
   hostControls.classList.remove('hidden');
   loadingIndicator.classList.add('hidden');
+  minPlayersWarning.classList.remove('hidden');
 });
 
 socket.on('roomUpdated', (data) => {
@@ -184,6 +187,11 @@ socket.on('roomUpdated', (data) => {
     answerTimeInput.value = data.settings.answerTime;
     discussionTimeInput.value = data.settings.discussionTime;
     voteTimeInput.value = data.settings.voteTime;
+    
+    // Update min players warning
+    minPlayersWarning.textContent = data.players.length < 3 
+      ? "Need at least 3 players to start" 
+      : "Ready to start game!";
   }
   
   loadingIndicator.classList.add('hidden');
@@ -194,9 +202,14 @@ socket.on('joinError', (message) => {
   loadingIndicator.classList.add('hidden');
 });
 
+socket.on('gameError', (message) => {
+  showError(message);
+});
+
 socket.on('gameStarted', (players) => {
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
+  minPlayersWarning.classList.add('hidden');
   updatePlayerList(players);
   updateFloatingScoreboard(players);
 });
@@ -367,6 +380,7 @@ socket.on('gameReset', (data) => {
     answerTimeInput.value = data.settings.answerTime;
     discussionTimeInput.value = data.settings.discussionTime;
     voteTimeInput.value = data.settings.voteTime;
+    minPlayersWarning.classList.remove('hidden');
   }
 });
 
@@ -384,11 +398,18 @@ function updatePlayerList(players) {
     const li = document.createElement('li');
     li.textContent = player.name + (player.id === socket.id ? " (You)" : "");
     li.innerHTML += ` <span class="player-score">${player.score} points</span>`;
-    if (player.id === rooms[myRoom]?.host) {
-      li.innerHTML += ' <span class="host-badge">HOST</span>';
+    if (player.id === socket.id) {
+      li.classList.add('you');
     }
     playerList.appendChild(li);
   });
+  
+  // Update min players warning
+  if (isHost) {
+    minPlayersWarning.textContent = players.length < 3 
+      ? "Need at least 3 players to start" 
+      : "Ready to start game!";
+  }
 }
 
 function updateFloatingScoreboard(players) {
@@ -399,8 +420,8 @@ function updateFloatingScoreboard(players) {
       <span class="player-name">${player.name}${player.id === socket.id ? " (You)" : ""}</span>
       <span class="player-score">${player.score}</span>
     `;
-    if (player.id === rooms[myRoom]?.host) {
-      li.classList.add('host');
+    if (player.id === socket.id) {
+      li.classList.add('you');
     }
     floatingScores.appendChild(li);
   });
@@ -432,4 +453,4 @@ function showNotification(message, type) {
   setTimeout(() => {
     document.body.removeChild(notification);
   }, 3000);
-                      }
+  }

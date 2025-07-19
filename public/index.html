@@ -11,13 +11,29 @@
     <!-- Join Screen -->
     <div id="join-screen">
       <h1>Guess Who Is Lying</h1>
-      <input type="text" id="playerName" placeholder="Your Name">
-      <input type="text" id="roomCode" placeholder="Room Code (if joining)">
+      
+      <div class="input-group">
+        <label for="playerName">Your Name:</label>
+        <input type="text" id="playerName" placeholder="Enter your name" autocomplete="off">
+      </div>
+      
+      <div class="input-group">
+        <label for="roomCode">Room Code:</label>
+        <input type="text" id="roomCode" placeholder="Enter 4-letter code" maxlength="4" autocomplete="off">
+        <div class="hint">(e.g., A1B2)</div>
+      </div>
+      
       <div class="btn-group">
         <button id="createBtn">Create Game</button>
         <button id="joinBtn">Join Game</button>
       </div>
+      
       <div id="error-message" class="hidden"></div>
+      
+      <div id="loading-indicator" class="hidden">
+        <div class="spinner"></div>
+        <p>Connecting to game room...</p>
+      </div>
     </div>
 
     <!-- Lobby Screen -->

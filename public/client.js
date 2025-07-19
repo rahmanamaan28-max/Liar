@@ -179,6 +179,9 @@ socket.on('roomCreated', (roomCode) => {
 });
 
 socket.on('roomUpdated', (data) => {
+  if (joinScreen.classList.contains('hidden') === false) {
+    showLobby(myRoom);
+  }
   updatePlayerList(data.players);
   updateFloatingScoreboard(data.players);
   

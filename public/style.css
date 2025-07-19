@@ -100,6 +100,10 @@ button:hover {
   justify-content: space-between;
 }
 
+#playerList li.you, #floating-scores li.you {
+  border-left: 4px solid var(--primary);
+}
+
 .real-question {
   font-weight: bold;
   color: var(--primary);
@@ -162,15 +166,6 @@ button:hover {
 
 .imposter-badge {
   background-color: var(--danger);
-  color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  margin-left: 5px;
-}
-
-.host-badge {
-  background-color: var(--warning);
   color: white;
   padding: 3px 8px;
   border-radius: 10px;
@@ -305,10 +300,6 @@ button:hover {
   border-bottom: none;
 }
 
-#floating-scores li.host {
-  font-weight: bold;
-}
-
 #floating-scores .player-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -378,6 +369,15 @@ button:hover {
   border-left: 4px solid #c62828;
 }
 
+.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  margin: 15px 0;
+  border-left: 4px solid #ffc107;
+}
+
 @keyframes fadeInOut {
   0% { opacity: 0; top: 10px; }
   10% { opacity: 1; top: 20px; }
@@ -400,5 +400,13 @@ button:hover {
   
   #floating-scores .player-name {
     max-width: 80px;
+  }
+  
+  #game-container {
+    padding: 20px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
   }
 }

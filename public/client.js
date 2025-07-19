@@ -48,6 +48,7 @@ const sendChatBtn = document.getElementById('send-chat');
 const chatContainer = document.getElementById('chat-container');
 const floatingScoreboard = document.getElementById('floating-scoreboard');
 const floatingScores = document.getElementById('floating-scores');
+const loadingIndicator = document.getElementById('loading-indicator');
 
 // Event Listeners
 document.getElementById('createBtn').addEventListener('click', createRoom);
@@ -86,11 +87,21 @@ function joinRoom() {
   myName = playerNameInput.value.trim();
   myRoom = roomCodeInput.value.trim().toUpperCase();
   
-  if (myName && myRoom) {
-    socket.emit('joinRoom', { name: myName, roomCode: myRoom });
-  } else {
-    showError("Please enter both name and room code");
+  // FIXED: Added validation and loading indicator
+  if (!myName) {
+    showError("Please enter your name");
+    return;
   }
+  
+  if (!myRoom || myRoom.length !== 4) {
+    showError("Room code must be 4 characters");
+    return;
+  }
+  
+  // Show loading indicator
+  loadingIndicator.classList.remove('hidden');
+  
+  socket.emit('joinRoom', { name: myName, roomCode: myRoom });
 }
 
 function startGame() {
@@ -148,7 +159,11 @@ function resetGame() {
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.classList.remove('hidden');
-  setTimeout(() => errorMessage.classList.add('hidden'), 3000);
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    errorMessage.classList.add('hidden');
+  }, 5000);
 }
 
 // Socket Event Handlers
@@ -157,6 +172,7 @@ socket.on('roomCreated', (roomCode) => {
   showLobby(roomCode);
   isHost = true;
   hostControls.classList.remove('hidden');
+  loadingIndicator.classList.add('hidden');
 });
 
 socket.on('roomUpdated', (data) => {
@@ -169,10 +185,13 @@ socket.on('roomUpdated', (data) => {
     discussionTimeInput.value = data.settings.discussionTime;
     voteTimeInput.value = data.settings.voteTime;
   }
+  
+  loadingIndicator.classList.add('hidden');
 });
 
 socket.on('joinError', (message) => {
   showError(message);
+  loadingIndicator.classList.add('hidden');
 });
 
 socket.on('gameStarted', (players) => {
@@ -413,4 +432,4 @@ function showNotification(message, type) {
   setTimeout(() => {
     document.body.removeChild(notification);
   }, 3000);
-}
+                      }

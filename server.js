@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
       settings: rooms[roomCode].settings,
       chat: rooms[roomCode].chat
     });
-    console.log(`Room created: ${roomCode} by ${name}`);
+    console.log(`Room created: ${roomCode} by ${name} with ${rooms[roomCode].settings.rounds} rounds`);
   });
 
   socket.on('joinRoom', ({ name, roomCode }) => {
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
         settings: room.settings,
         chat: room.chat
       });
-      console.log(`Settings updated in ${socket.roomCode}`);
+      console.log(`Settings updated in ${socket.roomCode}:`, room.settings);
     }
   });
 
@@ -117,7 +117,7 @@ io.on('connection', (socket) => {
       room.status = 'playing';
       room.currentRound = 1;
       startRound(socket.roomCode);
-      console.log(`Game started in ${socket.roomCode}`);
+      console.log(`Game started in ${socket.roomCode} with ${room.settings.rounds} rounds`);
     } else {
       console.log(`Start game failed for ${socket.roomCode} by ${socket.id}`);
       if (room.players.length < 3) {
@@ -263,7 +263,8 @@ io.on('connection', (socket) => {
     
     io.to(roomCode).emit('revealAnswers', {
       question: realQuestion,
-      answers: room.answers
+      answers: room.answers,
+      time: room.settings.discussionTime // FIX: Send discussion time
     });
     
     // Start discussion timer
@@ -336,7 +337,7 @@ io.on('connection', (socket) => {
     
     // Check if game should continue
     room.currentRound++;
-    if (room.currentRound <= room.settings.rounds) {
+    if (room.currentRound <= room.settings.rounds) { // FIX: Use settings
       setTimeout(() => startRound(roomCode), 5000);
     } else {
       // Game over

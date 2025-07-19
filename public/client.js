@@ -5,6 +5,90 @@ let isHost = false;
 let currentRound = 1;
 let timer;
 
+// Add at the top
+import { playSound } from './audioManager.js';
+
+// Add sound triggers throughout the code:
+
+// In createRoom function:
+playSound('button');
+
+// In joinRoom function:
+playSound('button');
+
+// In startGame function:
+playSound('start');
+
+// In submitAnswer function:
+playSound('submit');
+
+// In submitVote function:
+playSound('vote');
+
+// In sendChatMessage function:
+playSound('button');
+
+// In resetGame function:
+playSound('button');
+
+// In socket.on('roomCreated'):
+playSound('join');
+
+// In socket.on('roomUpdated'):
+if (joinScreen.classList.contains('hidden') === false) {
+  playSound('join');
+}
+
+// In socket.on('roundStart'):
+if (data.isImposter) {
+  playSound('wrong');
+} else {
+  playSound('correct');
+}
+
+// In socket.on('revealAnswers'):
+playSound('reveal');
+
+// In socket.on('startVoting'):
+playSound('vote');
+
+// In socket.on('roundResults'):
+if (data.imposterCaught) {
+  playSound('correct');
+} else {
+  playSound('wrong');
+}
+
+// In socket.on('gameOver'):
+if (data.winner.id === socket.id) {
+  playSound('win');
+} else {
+  playSound('lose');
+}
+
+// Add to startTimer function:
+function startTimer(seconds) {
+  clearInterval(timer);
+  timeLeft.textContent = seconds;
+  
+  timer = setInterval(() => {
+    seconds--;
+    timeLeft.textContent = seconds;
+    
+    // Play timer sound in last 3 seconds
+    if (seconds <= 3 && seconds > 0) {
+      playSound('timer');
+    }
+    
+    if (seconds <= 0) {
+      clearInterval(timer);
+    }
+  }, 1000);
+}
+
+// In showNotification function:
+playSound('notification');
+
 // DOM Elements
 const joinScreen = document.getElementById('join-screen');
 const lobbyScreen = document.getElementById('lobby-screen');

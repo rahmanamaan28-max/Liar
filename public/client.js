@@ -4,7 +4,6 @@ let myRoom = '';
 let isHost = false;
 let currentRound = 1;
 let timer;
-let selectedVote = null;
 
 // DOM Elements
 const joinScreen = document.getElementById('join-screen');
@@ -18,6 +17,11 @@ const playerList = document.getElementById('playerList');
 const errorMessage = document.getElementById('error-message');
 const hostControls = document.getElementById('hostControls');
 const startGameBtn = document.getElementById('startGame');
+const settingsForm = document.getElementById('settings-form');
+const roundsInput = document.getElementById('rounds');
+const answerTimeInput = document.getElementById('answerTime');
+const discussionTimeInput = document.getElementById('discussionTime');
+const voteTimeInput = document.getElementById('voteTime');
 const roundNumber = document.getElementById('round-number');
 const timeLeft = document.getElementById('time-left');
 const questionText = document.getElementById('question-text');
@@ -45,11 +49,20 @@ startGameBtn.addEventListener('click', startGame);
 submitAnswerBtn.addEventListener('click', submitAnswer);
 submitVoteBtn.addEventListener('click', submitVote);
 playAgainBtn.addEventListener('click', () => location.reload());
+settingsForm.addEventListener('submit', updateSettings);
 
 function createRoom() {
   myName = playerNameInput.value.trim();
   if (myName) {
-    socket.emit('createRoom', myName);
+    // Get default settings from form
+    const settings = {
+      rounds: parseInt(roundsInput.value) || 5,
+      answerTime: parseInt(answerTimeInput.value) || 30,
+      discussionTime: parseInt(discussionTimeInput.value) || 45,
+      voteTime: parseInt(voteTimeInput.value) || 30
+    };
+    
+    socket.emit('createRoom', { name: myName, settings });
   } else {
     showError("Please enter your name");
   }
@@ -67,14 +80,13 @@ function joinRoom() {
 }
 
 function startGame() {
-  socket.emit('startGame', myRoom);
-  console.log("Starting game for room:", myRoom);
+  socket.emit('startGame');
 }
 
 function submitAnswer() {
   const answer = answerInput.value.trim();
   if (answer) {
-    socket.emit('submitAnswer', { roomCode: myRoom, answer });
+    socket.emit('submitAnswer', { answer });
     answerInput.disabled = true;
     submitAnswerBtn.disabled = true;
     submitAnswerBtn.textContent = "Answer Submitted";
@@ -84,13 +96,27 @@ function submitAnswer() {
 }
 
 function submitVote() {
+  const selectedVote = document.querySelector('#vote-options li.selected');
   if (selectedVote) {
-    socket.emit('submitVote', { roomCode: myRoom, votedPlayerId: selectedVote });
+    socket.emit('submitVote', { votedPlayerId: selectedVote.dataset.playerId });
     submitVoteBtn.disabled = true;
     submitVoteBtn.textContent = "Vote Submitted";
   } else {
     showError("Please select a player to vote for");
   }
+}
+
+function updateSettings(e) {
+  e.preventDefault();
+  
+  const settings = {
+    rounds: parseInt(roundsInput.value) || 5,
+    answerTime: parseInt(answerTimeInput.value) || 30,
+    discussionTime: parseInt(discussionTimeInput.value) || 45,
+    voteTime: parseInt(voteTimeInput.value) || 30
+  };
+  
+  socket.emit('updateSettings', settings);
 }
 
 function showError(message) {
@@ -105,11 +131,17 @@ socket.on('roomCreated', (roomCode) => {
   showLobby(roomCode);
   isHost = true;
   hostControls.classList.remove('hidden');
-  console.log("Room created:", roomCode);
 });
 
-socket.on('playerJoined', (players) => {
-  updatePlayerList(players);
+socket.on('roomUpdated', (data) => {
+  updatePlayerList(data.players);
+  
+  if (isHost) {
+    roundsInput.value = data.settings.rounds;
+    answerTimeInput.value = data.settings.answerTime;
+    discussionTimeInput.value = data.settings.discussionTime;
+    voteTimeInput.value = data.settings.voteTime;
+  }
 });
 
 socket.on('joinError', (message) => {
@@ -120,7 +152,6 @@ socket.on('gameStarted', (players) => {
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   updatePlayerList(players);
-  console.log("Game started!");
 });
 
 socket.on('roundStart', (data) => {
@@ -159,7 +190,8 @@ socket.on('revealAnswers', (data) => {
     answersList.appendChild(li);
   });
   
-  startTimer(10); // Short timer to view answers
+  // Start timer for discussion phase
+  startTimer(10);
 });
 
 socket.on('startVoting', (data) => {
@@ -167,7 +199,6 @@ socket.on('startVoting', (data) => {
   votingContainer.classList.remove('hidden');
   
   voteOptions.innerHTML = '';
-  selectedVote = null;
   submitVoteBtn.disabled = false;
   submitVoteBtn.textContent = "Submit Vote";
   
@@ -183,7 +214,6 @@ socket.on('startVoting', (data) => {
         });
         // Select this one
         li.classList.add('selected');
-        selectedVote = player.id;
       });
       voteOptions.appendChild(li);
     }
@@ -241,10 +271,6 @@ socket.on('gameOver', (data) => {
   });
 });
 
-socket.on('updatePlayers', (players) => {
-  updatePlayerList(players);
-});
-
 // Helper Functions
 function showLobby(roomCode) {
   joinScreen.classList.add('hidden');
@@ -258,6 +284,9 @@ function updatePlayerList(players) {
     const li = document.createElement('li');
     li.textContent = player.name + (player.id === socket.id ? " (You)" : "");
     li.innerHTML += ` <span class="player-score">${player.score} points</span>`;
+    if (player.id === rooms[myRoom]?.host) {
+      li.innerHTML += ' <span class="host-badge">HOST</span>';
+    }
     playerList.appendChild(li);
   });
 }

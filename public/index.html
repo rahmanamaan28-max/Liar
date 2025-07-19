@@ -70,6 +70,15 @@
         <ul id="answers-list"></ul>
       </div>
       
+      <div id="chat-container" class="hidden">
+        <h3>Discussion</h3>
+        <div id="chat-messages"></div>
+        <div class="chat-input-container">
+          <input type="text" id="chat-input" placeholder="Type your message...">
+          <button id="send-chat">Send</button>
+        </div>
+      </div>
+      
       <div id="voting-container" class="hidden">
         <h3>Who is the imposter?</h3>
         <ul id="vote-options"></ul>
@@ -94,8 +103,17 @@
         <h3>Final Scores:</h3>
         <ul id="final-scores"></ul>
       </div>
-      <button id="play-again">Play Again</button>
+      <div class="btn-group">
+        <button id="play-again">Leave Game</button>
+        <button id="play-again-host" class="hidden">Play Again</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Floating Scoreboard -->
+  <div id="floating-scoreboard" class="hidden">
+    <h3>Scoreboard</h3>
+    <ul id="floating-scores"></ul>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>

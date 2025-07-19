@@ -40,7 +40,8 @@ io.on('connection', (socket) => {
       imposter: null,
       answers: [],
       votes: {},
-      settings: { ...defaultSettings, ...settings }
+      settings: { ...defaultSettings, ...settings },
+      chat: []
     };
     
     socket.join(roomCode);
@@ -48,7 +49,8 @@ io.on('connection', (socket) => {
     socket.emit('roomCreated', roomCode);
     io.to(roomCode).emit('roomUpdated', {
       players: rooms[roomCode].players,
-      settings: rooms[roomCode].settings
+      settings: rooms[roomCode].settings,
+      chat: rooms[roomCode].chat
     });
     console.log(`Room created: ${roomCode} by ${name}`);
   });
@@ -63,7 +65,8 @@ io.on('connection', (socket) => {
       socket.roomCode = roomCode;
       io.to(roomCode).emit('roomUpdated', {
         players: room.players,
-        settings: room.settings
+        settings: room.settings,
+        chat: room.chat
       });
       console.log(`${name} joined ${roomCode}`);
     } else {
@@ -79,7 +82,8 @@ io.on('connection', (socket) => {
       room.settings = { ...room.settings, ...newSettings };
       io.to(room.roomCode).emit('roomUpdated', {
         players: room.players,
-        settings: room.settings
+        settings: room.settings,
+        chat: room.chat
       });
       console.log(`Settings updated in ${socket.roomCode}`);
     }
@@ -125,6 +129,48 @@ io.on('connection', (socket) => {
       console.log(`Vote submitted by ${socket.id} in ${socket.roomCode}`);
     }
   });
+  
+  socket.on('sendChatMessage', (message) => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
+    if (room && room.status === 'playing') {
+      const player = room.players.find(p => p.id === socket.id);
+      if (player) {
+        const chatMessage = {
+          playerId: socket.id,
+          playerName: player.name,
+          message,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        
+        room.chat.push(chatMessage);
+        io.to(socket.roomCode).emit('chatMessage', chatMessage);
+      }
+    }
+  });
+
+  socket.on('resetGame', () => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
+    if (room && room.host === socket.id) {
+      // Reset game state but keep players and settings
+      room.status = 'lobby';
+      room.currentRound = 0;
+      room.players.forEach(player => player.score = 0);
+      room.imposter = null;
+      room.answers = [];
+      room.votes = {};
+      room.chat = [];
+      
+      io.to(socket.roomCode).emit('gameReset', {
+        players: room.players,
+        settings: room.settings
+      });
+      console.log(`Game reset in ${socket.roomCode}`);
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('❌ User disconnected:', socket.id);
@@ -140,7 +186,8 @@ io.on('connection', (socket) => {
         room.host = room.players[0].id;
         io.to(code).emit('roomUpdated', {
           players: room.players,
-          settings: room.settings
+          settings: room.settings,
+          chat: room.chat
         });
         console.log(`New host assigned in room ${code}: ${room.host}`);
       }
@@ -154,6 +201,7 @@ io.on('connection', (socket) => {
     // Reset round data
     room.answers = [];
     room.votes = {};
+    room.chat = [];
     
     // Select random question
     const questionIndex = Math.floor(Math.random() * questions.length);

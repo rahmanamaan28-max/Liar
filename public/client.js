@@ -72,10 +72,10 @@ function createRoom() {
   if (myName) {
     // Get default settings from form
     const settings = {
-      rounds: parseInt(roundsInput.value) || 5,
-      answerTime: parseInt(answerTimeInput.value) || 30,
+      rounds: parseInt(roundsInput.value) || 4,
+      answerTime: parseInt(answerTimeInput.value) || 20,
       discussionTime: parseInt(discussionTimeInput.value) || 45,
-      voteTime: parseInt(voteTimeInput.value) || 30
+      voteTime: parseInt(voteTimeInput.value) || 20
     };
     
     socket.emit('createRoom', { name: myName, settings });

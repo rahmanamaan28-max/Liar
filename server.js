@@ -17,32 +17,39 @@ const rooms = {};
 io.on('connection', (socket) => {
   console.log('✅ User connected:', socket.id);
 
-  socket.on('createRoom', (name) => {
+  socket.on('createRoom', ({ name, settings }) => {
     // Generate unique room code
     let roomCode;
     do {
       roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     } while (rooms[roomCode]);
     
+    // Default settings
+    const defaultSettings = {
+      rounds: 5,
+      answerTime: 30,
+      discussionTime: 45,
+      voteTime: 30
+    };
+    
     rooms[roomCode] = {
       host: socket.id,
       players: [{ id: socket.id, name, score: 0 }],
       status: 'lobby',
       currentRound: 0,
-      rounds: 5,
       imposter: null,
       answers: [],
       votes: {},
-      settings: {
-        answerTime: 30,
-        discussionTime: 45,
-        voteTime: 30
-      }
+      settings: { ...defaultSettings, ...settings }
     };
     
     socket.join(roomCode);
+    socket.roomCode = roomCode;
     socket.emit('roomCreated', roomCode);
-    io.to(roomCode).emit('playerJoined', rooms[roomCode].players); // FIX: Send player list
+    io.to(roomCode).emit('roomUpdated', {
+      players: rooms[roomCode].players,
+      settings: rooms[roomCode].settings
+    });
     console.log(`Room created: ${roomCode} by ${name}`);
   });
 
@@ -53,50 +60,69 @@ io.on('connection', (socket) => {
     if (room && room.status === 'lobby') {
       room.players.push({ id: socket.id, name, score: 0 });
       socket.join(roomCode);
-      io.to(roomCode).emit('playerJoined', room.players);
+      socket.roomCode = roomCode;
+      io.to(roomCode).emit('roomUpdated', {
+        players: room.players,
+        settings: room.settings
+      });
       console.log(`${name} joined ${roomCode}`);
     } else {
       socket.emit('joinError', room ? 'Game already started' : 'Room not found');
     }
   });
 
-  socket.on('startGame', (roomCode) => {
-    const room = rooms[roomCode];
+  socket.on('updateSettings', (newSettings) => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
     if (room && room.host === socket.id) {
-      room.status = 'playing';
-      room.currentRound = 1;
-      startRound(roomCode);
-      console.log(`Game started in ${roomCode}`);
-    } else {
-      console.log(`Start game failed for ${roomCode} by ${socket.id}`);
+      room.settings = { ...room.settings, ...newSettings };
+      io.to(room.roomCode).emit('roomUpdated', {
+        players: room.players,
+        settings: room.settings
+      });
+      console.log(`Settings updated in ${socket.roomCode}`);
     }
   });
 
-  socket.on('submitAnswer', ({ roomCode, answer }) => {
-    const room = rooms[roomCode];
+  socket.on('startGame', () => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
+    if (room && room.host === socket.id) {
+      room.status = 'playing';
+      room.currentRound = 1;
+      startRound(socket.roomCode);
+      console.log(`Game started in ${socket.roomCode}`);
+    } else {
+      console.log(`Start game failed for ${socket.roomCode} by ${socket.id}`);
+    }
+  });
+
+  socket.on('submitAnswer', ({ answer }) => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
     if (room && room.status === 'playing') {
       const player = room.players.find(p => p.id === socket.id);
-      if (player) {
+      if (player && !room.answers.some(a => a.playerId === socket.id)) {
         room.answers.push({
           playerId: socket.id,
           playerName: player.name,
           answer
         });
-        console.log(`Answer submitted by ${player.name} in ${roomCode}`);
+        console.log(`Answer submitted by ${player.name} in ${socket.roomCode}`);
       }
     }
   });
 
-  socket.on('submitVote', ({ roomCode, votedPlayerId }) => {
-    const room = rooms[roomCode];
+  socket.on('submitVote', ({ votedPlayerId }) => {
+    if (!socket.roomCode) return;
+    const room = rooms[socket.roomCode];
+    
     if (room && room.status === 'playing') {
       room.votes[socket.id] = votedPlayerId;
-      console.log(`Vote submitted by ${socket.id} in ${roomCode}`);
-      
-      // Check if all votes are in
-      if (Object.keys(room.votes).length === room.players.length) {
-        calculateRoundResults(roomCode);
-      }
+      console.log(`Vote submitted by ${socket.id} in ${socket.roomCode}`);
     }
   });
 
@@ -112,7 +138,10 @@ io.on('connection', (socket) => {
       } else if (room.host === socket.id) {
         // Assign new host
         room.host = room.players[0].id;
-        io.to(code).emit('updatePlayers', room.players);
+        io.to(code).emit('roomUpdated', {
+          players: room.players,
+          settings: room.settings
+        });
         console.log(`New host assigned in room ${code}: ${room.host}`);
       }
     }
@@ -138,7 +167,6 @@ io.on('connection', (socket) => {
     room.players.forEach(player => {
       const questionToSend = player.id === room.imposter ? question.fake : question.real;
       io.to(player.id).emit('roundStart', {
-        roomCode,
         round: room.currentRound,
         question: questionToSend,
         isImposter: player.id === room.imposter,
@@ -233,7 +261,7 @@ io.on('connection', (socket) => {
     
     // Check if game should continue
     room.currentRound++;
-    if (room.currentRound <= room.rounds) {
+    if (room.currentRound <= room.settings.rounds) {
       setTimeout(() => startRound(roomCode), 5000);
     } else {
       // Game over

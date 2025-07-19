@@ -37,10 +37,17 @@ const winnerName = document.getElementById('winner-name');
 const winnerScore = document.getElementById('winner-score');
 const finalScores = document.getElementById('final-scores');
 const playAgainBtn = document.getElementById('play-again');
+const playAgainHostBtn = document.getElementById('play-again-host');
 const questionContainer = document.getElementById('question-container');
 const answersContainer = document.getElementById('answers-container');
 const votingContainer = document.getElementById('voting-container');
 const resultsContainer = document.getElementById('results-container');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendChatBtn = document.getElementById('send-chat');
+const chatContainer = document.getElementById('chat-container');
+const floatingScoreboard = document.getElementById('floating-scoreboard');
+const floatingScores = document.getElementById('floating-scores');
 
 // Event Listeners
 document.getElementById('createBtn').addEventListener('click', createRoom);
@@ -49,7 +56,14 @@ startGameBtn.addEventListener('click', startGame);
 submitAnswerBtn.addEventListener('click', submitAnswer);
 submitVoteBtn.addEventListener('click', submitVote);
 playAgainBtn.addEventListener('click', () => location.reload());
+playAgainHostBtn.addEventListener('click', resetGame);
 settingsForm.addEventListener('submit', updateSettings);
+sendChatBtn.addEventListener('click', sendChatMessage);
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendChatMessage();
+  }
+});
 
 function createRoom() {
   myName = playerNameInput.value.trim();
@@ -119,6 +133,18 @@ function updateSettings(e) {
   socket.emit('updateSettings', settings);
 }
 
+function sendChatMessage() {
+  const message = chatInput.value.trim();
+  if (message) {
+    socket.emit('sendChatMessage', message);
+    chatInput.value = '';
+  }
+}
+
+function resetGame() {
+  socket.emit('resetGame');
+}
+
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.classList.remove('hidden');
@@ -135,6 +161,7 @@ socket.on('roomCreated', (roomCode) => {
 
 socket.on('roomUpdated', (data) => {
   updatePlayerList(data.players);
+  updateFloatingScoreboard(data.players);
   
   if (isHost) {
     roundsInput.value = data.settings.rounds;
@@ -152,6 +179,7 @@ socket.on('gameStarted', (players) => {
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   updatePlayerList(players);
+  updateFloatingScoreboard(players);
 });
 
 socket.on('roundStart', (data) => {
@@ -164,6 +192,7 @@ socket.on('roundStart', (data) => {
   answersContainer.classList.add('hidden');
   votingContainer.classList.add('hidden');
   resultsContainer.classList.add('hidden');
+  chatContainer.classList.add('hidden');
   
   answerInput.value = '';
   answerInput.disabled = false;
@@ -182,20 +211,52 @@ socket.on('roundStart', (data) => {
 socket.on('revealAnswers', (data) => {
   questionContainer.classList.add('hidden');
   answersContainer.classList.remove('hidden');
+  chatContainer.classList.remove('hidden');
   
   answersList.innerHTML = '';
+  const realQuestion = document.createElement('p');
+  realQuestion.textContent = `The real question was: ${data.question}`;
+  realQuestion.classList.add('real-question');
+  answersList.appendChild(realQuestion);
+  
   data.answers.forEach(answer => {
     const li = document.createElement('li');
     li.textContent = `${answer.playerName}: ${answer.answer}`;
     answersList.appendChild(li);
   });
   
+  // Clear chat
+  chatMessages.innerHTML = '';
+  
   // Start timer for discussion phase
   startTimer(10);
 });
 
+socket.on('chatMessage', (message) => {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('chat-message');
+  
+  const sender = document.createElement('strong');
+  sender.textContent = `${message.playerName}: `;
+  
+  const content = document.createElement('span');
+  content.textContent = message.message;
+  
+  const time = document.createElement('span');
+  time.classList.add('chat-time');
+  time.textContent = message.timestamp;
+  
+  messageElement.appendChild(sender);
+  messageElement.appendChild(content);
+  messageElement.appendChild(time);
+  
+  chatMessages.appendChild(messageElement);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+
 socket.on('startVoting', (data) => {
   answersContainer.classList.add('hidden');
+  chatContainer.classList.add('hidden');
   votingContainer.classList.remove('hidden');
   
   voteOptions.innerHTML = '';
@@ -238,6 +299,7 @@ socket.on('roundResults', (data) => {
   
   // Update scores display
   updatePlayerList(data.players);
+  updateFloatingScoreboard(data.players);
   
   // Show countdown to next round
   let countdown = 5;
@@ -269,6 +331,24 @@ socket.on('gameOver', (data) => {
     }
     finalScores.appendChild(li);
   });
+  
+  // Show play again button only to host
+  playAgainHostBtn.classList.toggle('hidden', !isHost);
+});
+
+socket.on('gameReset', (data) => {
+  gameOverScreen.classList.add('hidden');
+  lobbyScreen.classList.remove('hidden');
+  
+  updatePlayerList(data.players);
+  updateFloatingScoreboard(data.players);
+  
+  if (isHost) {
+    roundsInput.value = data.settings.rounds;
+    answerTimeInput.value = data.settings.answerTime;
+    discussionTimeInput.value = data.settings.discussionTime;
+    voteTimeInput.value = data.settings.voteTime;
+  }
 });
 
 // Helper Functions
@@ -276,6 +356,7 @@ function showLobby(roomCode) {
   joinScreen.classList.add('hidden');
   lobbyScreen.classList.remove('hidden');
   roomDisplay.textContent = roomCode;
+  floatingScoreboard.classList.remove('hidden');
 }
 
 function updatePlayerList(players) {
@@ -288,6 +369,21 @@ function updatePlayerList(players) {
       li.innerHTML += ' <span class="host-badge">HOST</span>';
     }
     playerList.appendChild(li);
+  });
+}
+
+function updateFloatingScoreboard(players) {
+  floatingScores.innerHTML = '';
+  players.forEach(player => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="player-name">${player.name}${player.id === socket.id ? " (You)" : ""}</span>
+      <span class="player-score">${player.score}</span>
+    `;
+    if (player.id === rooms[myRoom]?.host) {
+      li.classList.add('host');
+    }
+    floatingScores.appendChild(li);
   });
 }
 

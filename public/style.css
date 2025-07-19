@@ -38,6 +38,8 @@ body {
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3 {
@@ -58,6 +60,7 @@ input[type="text"], input[type="number"] {
   display: flex;
   gap: 10px;
   margin-top: 15px;
+  justify-content: center;
 }
 
 button {
@@ -95,6 +98,14 @@ button:hover {
   text-align: left;
   display: flex;
   justify-content: space-between;
+}
+
+.real-question {
+  font-weight: bold;
+  color: var(--primary);
+  padding: 10px 0;
+  border-bottom: 2px solid var(--light-gray);
+  margin-bottom: 10px;
 }
 
 #vote-options li {
@@ -206,9 +217,131 @@ button:hover {
   max-width: 80px;
 }
 
+/* Chat Styles */
+#chat-container {
+  background-color: #f8f9fa;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  margin-top: 20px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 200px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--light-gray);
+}
+
+.chat-message {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chat-message strong {
+  margin-right: 5px;
+}
+
+.chat-time {
+  font-size: 0.8rem;
+  color: var(--gray);
+  margin-left: auto;
+}
+
+.chat-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input-container input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--border-radius);
+}
+
+/* Floating Scoreboard */
+#floating-scoreboard {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: var(--box-shadow);
+  z-index: 100;
+  width: 180px;
+}
+
+#floating-scoreboard h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  text-align: center;
+  color: var(--primary);
+}
+
+#floating-scores {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#floating-scores li {
+  padding: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
+
+#floating-scores li:last-child {
+  border-bottom: none;
+}
+
+#floating-scores li.host {
+  font-weight: bold;
+}
+
+#floating-scores .player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+#floating-scores .player-score {
+  font-weight: bold;
+  color: var(--primary);
+}
+
 @keyframes fadeInOut {
   0% { opacity: 0; top: 10px; }
   10% { opacity: 1; top: 20px; }
   90% { opacity: 1; top: 20px; }
   100% { opacity: 0; top: 10px; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #floating-scoreboard {
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    padding: 10px;
+  }
+  
+  #floating-scoreboard h3 {
+    font-size: 1rem;
+  }
+  
+  #floating-scores .player-name {
+    max-width: 80px;
+  }
 }

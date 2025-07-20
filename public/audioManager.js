@@ -16,32 +16,21 @@ const AudioManager = (function() {
     notification: '/sounds/notification.mp3'
   };
 
-  // Audio context for better control
-  let audioContext;
-  let isMuted = localStorage.getItem('isMuted') === 'true';
+  // Audio elements
   let audioElements = {};
+  let isMuted = localStorage.getItem('isMuted') === 'true';
   const cooldowns = {};
 
   // Initialize audio
   function init() {
-    try {
-      // Create audio context
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Preload audio files
-      Object.keys(sounds).forEach(sound => {
-        const audio = new Audio(sounds[sound]);
-        audio.preload = 'auto';
-        audioElements[sound] = audio;
-      });
-      
-      // Create mute button
-      createMuteButton();
-      
-      console.log('AudioManager initialized');
-    } catch (e) {
-      console.error('Audio initialization failed', e);
-    }
+    // Preload audio files
+    Object.keys(sounds).forEach(sound => {
+      audioElements[sound] = new Audio(sounds[sound]);
+      audioElements[sound].preload = 'auto';
+    });
+
+    // Create mute button
+    createMuteButton();
   }
 
   // Create mute button UI

@@ -37,7 +37,7 @@
     </div>
 
     <!-- Lobby Screen -->
-    <div id="lobby-screen" class="hidden"> <!-- Keep this hidden initially -->
+    <div id="lobby-screen" class="hidden">
       <h2>Lobby: <span id="roomDisplay"></span></h2>
       <p>Waiting for host to start the game...</p>
       
@@ -135,9 +135,22 @@
     <ul id="floating-scores"></ul>
   </div>
 
+  <!-- Audio Elements -->
+  <audio id="button-sound" src="/sounds/button.mp3" preload="auto"></audio>
+  <audio id="join-sound" src="/sounds/join.mp3" preload="auto"></audio>
+  <audio id="start-sound" src="/sounds/start.mp3" preload="auto"></audio>
+  <audio id="submit-sound" src="/sounds/submit.mp3" preload="auto"></audio>
+  <audio id="reveal-sound" src="/sounds/reveal.mp3" preload="auto"></audio>
+  <audio id="vote-sound" src="/sounds/vote.mp3" preload="auto"></audio>
+  <audio id="correct-sound" src="/sounds/correct.mp3" preload="auto"></audio>
+  <audio id="wrong-sound" src="/sounds/wrong.mp3" preload="auto"></audio>
+  <audio id="win-sound" src="/sounds/win.mp3" preload="auto"></audio>
+  <audio id="lose-sound" src="/sounds/lose.mp3" preload="auto"></audio>
+  <audio id="timer-sound" src="/sounds/timer.mp3" preload="auto"></audio>
+  <audio id="notification-sound" src="/sounds/notification.mp3" preload="auto"></audio>
+
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Add before client.js script -->
-<script type="module" src="audioManager.js"></script>
-<script type="module" src="client.js"></script>
+  <script src="audioManager.js"></script>
+  <script src="client.js"></script>
 </body>
 </html>

@@ -26,10 +26,10 @@ io.on('connection', (socket) => {
     
     // Default settings
     const defaultSettings = {
-      rounds: 4,
-      answerTime: 20,
+      rounds: 5,
+      answerTime: 30,
       discussionTime: 45,
-      voteTime: 20
+      voteTime: 30
     };
     
     rooms[roomCode] = {
@@ -91,6 +91,9 @@ io.on('connection', (socket) => {
       chat: room.chat
     });
     
+    // Notify host about new player
+    io.to(room.host).emit('playerJoined');
+    
     console.log(`${name} joined ${roomCode}`);
   });
 
@@ -121,10 +124,7 @@ io.on('connection', (socket) => {
     } else {
       console.log(`Start game failed for ${socket.roomCode} by ${socket.id}`);
       if (room.players.length < 3) {
-  // Send specific error to host
-  io.to(socket.id).emit('gameError', 'Need at least 3 players to start');
-  console.log(`Not enough players in ${socket.roomCode} (${room.players.length})`);
-  return;
+        socket.emit('gameError', 'Need at least 3 players to start');
       }
     }
   });
@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('revealAnswers', {
       question: realQuestion,
       answers: room.answers,
-      time: room.settings.discussionTime // FIX: Send discussion time
+      time: room.settings.discussionTime
     });
     
     // Start discussion timer
@@ -340,7 +340,7 @@ io.on('connection', (socket) => {
     
     // Check if game should continue
     room.currentRound++;
-    if (room.currentRound <= room.settings.rounds) { // FIX: Use settings
+    if (room.currentRound <= room.settings.rounds) {
       setTimeout(() => startRound(roomCode), 5000);
     } else {
       // Game over

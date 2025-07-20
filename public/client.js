@@ -5,90 +5,6 @@ let isHost = false;
 let currentRound = 1;
 let timer;
 
-// Add at the top
-import { playSound } from './audioManager.js';
-
-// Add sound triggers throughout the code:
-
-// In createRoom function:
-playSound('button');
-
-// In joinRoom function:
-playSound('button');
-
-// In startGame function:
-playSound('start');
-
-// In submitAnswer function:
-playSound('submit');
-
-// In submitVote function:
-playSound('vote');
-
-// In sendChatMessage function:
-playSound('button');
-
-// In resetGame function:
-playSound('button');
-
-// In socket.on('roomCreated'):
-playSound('join');
-
-// In socket.on('roomUpdated'):
-if (joinScreen.classList.contains('hidden') === false) {
-  playSound('join');
-}
-
-// In socket.on('roundStart'):
-if (data.isImposter) {
-  playSound('wrong');
-} else {
-  playSound('correct');
-}
-
-// In socket.on('revealAnswers'):
-playSound('reveal');
-
-// In socket.on('startVoting'):
-playSound('vote');
-
-// In socket.on('roundResults'):
-if (data.imposterCaught) {
-  playSound('correct');
-} else {
-  playSound('wrong');
-}
-
-// In socket.on('gameOver'):
-if (data.winner.id === socket.id) {
-  playSound('win');
-} else {
-  playSound('lose');
-}
-
-// Add to startTimer function:
-function startTimer(seconds) {
-  clearInterval(timer);
-  timeLeft.textContent = seconds;
-  
-  timer = setInterval(() => {
-    seconds--;
-    timeLeft.textContent = seconds;
-    
-    // Play timer sound in last 3 seconds
-    if (seconds <= 3 && seconds > 0) {
-      playSound('timer');
-    }
-    
-    if (seconds <= 0) {
-      clearInterval(timer);
-    }
-  }, 1000);
-}
-
-// In showNotification function:
-playSound('notification');
-
 // DOM Elements
 const joinScreen = document.getElementById('join-screen');
 const lobbyScreen = document.getElementById('lobby-screen');
@@ -154,12 +70,15 @@ chatInput.addEventListener('keypress', (e) => {
 function createRoom() {
   myName = playerNameInput.value.trim();
   if (myName) {
+    // Play sound
+    AudioManager.playSound('button');
+    
     // Get default settings from form
     const settings = {
-      rounds: parseInt(roundsInput.value) || 4,
-      answerTime: parseInt(answerTimeInput.value) || 20,
+      rounds: parseInt(roundsInput.value) || 5,
+      answerTime: parseInt(answerTimeInput.value) || 30,
       discussionTime: parseInt(discussionTimeInput.value) || 45,
-      voteTime: parseInt(voteTimeInput.value) || 20
+      voteTime: parseInt(voteTimeInput.value) || 30
     };
     
     socket.emit('createRoom', { name: myName, settings });
@@ -183,6 +102,9 @@ function joinRoom() {
     return;
   }
   
+  // Play sound
+  AudioManager.playSound('button');
+  
   // Show loading indicator
   loadingIndicator.classList.remove('hidden');
   minPlayersWarning.classList.add('hidden');
@@ -191,12 +113,17 @@ function joinRoom() {
 }
 
 function startGame() {
+  // Play sound
+  AudioManager.playSound('start');
   socket.emit('startGame');
 }
 
 function submitAnswer() {
   const answer = answerInput.value.trim();
   if (answer) {
+    // Play sound
+    AudioManager.playSound('submit');
+    
     socket.emit('submitAnswer', { answer });
     answerInput.disabled = true;
     submitAnswerBtn.disabled = true;
@@ -209,6 +136,9 @@ function submitAnswer() {
 function submitVote() {
   const selectedVote = document.querySelector('#vote-options li.selected');
   if (selectedVote) {
+    // Play sound
+    AudioManager.playSound('vote');
+    
     socket.emit('submitVote', { votedPlayerId: selectedVote.dataset.playerId });
     submitVoteBtn.disabled = true;
     submitVoteBtn.textContent = "Vote Submitted";
@@ -219,6 +149,9 @@ function submitVote() {
 
 function updateSettings(e) {
   e.preventDefault();
+  
+  // Play sound
+  AudioManager.playSound('button');
   
   const settings = {
     rounds: parseInt(roundsInput.value) || 5,
@@ -233,12 +166,17 @@ function updateSettings(e) {
 function sendChatMessage() {
   const message = chatInput.value.trim();
   if (message) {
+    // Play sound
+    AudioManager.playSound('button');
+    
     socket.emit('sendChatMessage', message);
     chatInput.value = '';
   }
 }
 
 function resetGame() {
+  // Play sound
+  AudioManager.playSound('button');
   socket.emit('resetGame');
 }
 
@@ -260,12 +198,16 @@ socket.on('roomCreated', (roomCode) => {
   hostControls.classList.remove('hidden');
   loadingIndicator.classList.add('hidden');
   minPlayersWarning.classList.remove('hidden');
+  
+  // Play sound
+  AudioManager.playSound('join');
 });
 
 socket.on('roomUpdated', (data) => {
   if (joinScreen.classList.contains('hidden') === false) {
     showLobby(myRoom);
   }
+  
   updatePlayerList(data.players);
   updateFloatingScoreboard(data.players);
   
@@ -282,6 +224,9 @@ socket.on('roomUpdated', (data) => {
   }
   
   loadingIndicator.classList.add('hidden');
+  
+  // Play sound
+  AudioManager.playSound('join');
 });
 
 socket.on('joinError', (message) => {
@@ -294,7 +239,7 @@ socket.on('gameError', (message) => {
 });
 
 socket.on('gameStarted', (players) => {
-  joinScreen.classList.add('hidden'); // FIX: Hide join screen for all
+  joinScreen.classList.add('hidden');
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   minPlayersWarning.classList.add('hidden');
@@ -319,10 +264,13 @@ socket.on('roundStart', (data) => {
   submitAnswerBtn.disabled = false;
   submitAnswerBtn.textContent = "Submit Answer";
   
+  // Play sound based on role
   if (data.isImposter) {
     showNotification("You are the IMPOSTER this round!", "danger");
+    AudioManager.playSound('wrong');
   } else {
     showNotification("You are telling the TRUTH this round!", "success");
+    AudioManager.playSound('correct');
   }
   
   startTimer(data.time);
@@ -348,7 +296,10 @@ socket.on('revealAnswers', (data) => {
   // Clear chat
   chatMessages.innerHTML = '';
   
-  // Start timer for discussion phase - FIX: Use actual discussion time
+  // Play sound
+  AudioManager.playSound('reveal');
+  
+  // Start timer for discussion phase
   startTimer(data.time);
 });
 
@@ -400,6 +351,9 @@ socket.on('startVoting', (data) => {
     }
   });
   
+  // Play sound
+  AudioManager.playSound('vote');
+  
   startTimer(data.time);
 });
 
@@ -412,9 +366,11 @@ socket.on('roundResults', (data) => {
   if (data.imposterCaught) {
     imposterResult.textContent = `The imposter (${imposterPlayer.name}) was caught!`;
     imposterResult.style.color = "green";
+    AudioManager.playSound('correct');
   } else {
     imposterResult.textContent = `The imposter (${imposterPlayer.name}) was not caught!`;
     imposterResult.style.color = "red";
+    AudioManager.playSound('wrong');
   }
   
   // Update scores display
@@ -452,6 +408,13 @@ socket.on('gameOver', (data) => {
     finalScores.appendChild(li);
   });
   
+  // Play sound
+  if (data.winner.id === socket.id) {
+    AudioManager.playSound('win');
+  } else {
+    AudioManager.playSound('lose');
+  }
+  
   // Show play again button only to host
   playAgainHostBtn.classList.toggle('hidden', !isHost);
 });
@@ -472,12 +435,16 @@ socket.on('gameReset', (data) => {
   }
 });
 
+socket.on('playerJoined', () => {
+  AudioManager.playSound('join');
+});
+
 // Helper Functions
 function showLobby(roomCode) {
   joinScreen.classList.add('hidden');
   lobbyScreen.classList.remove('hidden');
   roomDisplay.textContent = roomCode;
-  floatingScoreboard.classList.remove('hidden'); // FIX: Show scoreboard for all
+  floatingScoreboard.classList.remove('hidden');
 }
 
 function updatePlayerList(players) {
@@ -519,9 +486,21 @@ function startTimer(seconds) {
   clearInterval(timer);
   timeLeft.textContent = seconds;
   
+  // Clear any existing timer sounds
+  const timerSound = document.getElementById('timer-sound');
+  if (timerSound) {
+    timerSound.pause();
+    timerSound.currentTime = 0;
+  }
+  
   timer = setInterval(() => {
     seconds--;
     timeLeft.textContent = seconds;
+    
+    // Play timer sound in last 3 seconds
+    if (seconds <= 3 && seconds > 0) {
+      AudioManager.playSound('timer');
+    }
     
     if (seconds <= 0) {
       clearInterval(timer);
@@ -530,6 +509,9 @@ function startTimer(seconds) {
 }
 
 function showNotification(message, type) {
+  // Play sound
+  AudioManager.playSound('notification');
+  
   // Create notification element
   const notification = document.createElement('div');
   notification.className = `notification ${type}`;

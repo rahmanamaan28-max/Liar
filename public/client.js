@@ -368,7 +368,18 @@ socket.on('roundResults', (data) => {
     imposterResult.style.color = "green";
     AudioManager.playSound('correct');
   } else {
-    imposterResult.textContent = `The imposter (${imposterPlayer.name}) was not caught!`;
+    // Determine why imposter wasn't caught
+    const imposterVotes = data.voteCounts[data.imposterId] || 0;
+    const maxVotes = Math.max(...Object.values(data.voteCounts));
+    
+    let reason = "";
+    if (imposterVotes < maxVotes) {
+      reason = `didn't get the most votes (${imposterVotes} votes)`;
+    } else {
+      reason = `tied for most votes (${imposterVotes} votes)`;
+    }
+    
+    imposterResult.textContent = `The imposter (${imposterPlayer.name}) was not caught because they ${reason}!`;
     imposterResult.style.color = "red";
     AudioManager.playSound('wrong');
   }
@@ -376,6 +387,21 @@ socket.on('roundResults', (data) => {
   // Update scores display
   updatePlayerList(data.players);
   updateFloatingScoreboard(data.players);
+  
+  // Show vote counts
+  scoreUpdate.innerHTML = '<h4>Vote Results:</h4>';
+  for (const [playerId, votes] of Object.entries(data.voteCounts)) {
+    const player = data.players.find(p => p.id === playerId);
+    if (player) {
+      const voteDiv = document.createElement('div');
+      voteDiv.textContent = `${player.name}: ${votes} vote${votes !== 1 ? 's' : ''}`;
+      if (playerId === data.imposterId) {
+        voteDiv.style.fontWeight = 'bold';
+        voteDiv.style.color = 'var(--danger)';
+      }
+      scoreUpdate.appendChild(voteDiv);
+    }
+  }
   
   // Show countdown to next round
   let countdown = 5;
@@ -523,4 +549,4 @@ function showNotification(message, type) {
   setTimeout(() => {
     document.body.removeChild(notification);
   }, 3000);
-}
+                                                         }

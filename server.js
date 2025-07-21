@@ -302,18 +302,26 @@ io.on('connection', (socket) => {
       voteCounts[votedPlayerId] = (voteCounts[votedPlayerId] || 0) + 1;
     }
     
-    // Find most voted player
+    // Find the player with the most votes
     let mostVotedId = null;
     let maxVotes = 0;
+    let isTie = false;
+    
     for (const [playerId, count] of Object.entries(voteCounts)) {
       if (count > maxVotes) {
         mostVotedId = playerId;
         maxVotes = count;
+        isTie = false;
+      } else if (count === maxVotes && playerId !== mostVotedId) {
+        isTie = true;
       }
     }
     
     // Determine if imposter was caught
-    const imposterCaught = mostVotedId === room.imposter;
+    let imposterCaught = false;
+    if (mostVotedId === room.imposter && !isTie) {
+      imposterCaught = true;
+    }
     
     // Award points
     if (imposterCaught) {
@@ -325,7 +333,7 @@ io.on('connection', (socket) => {
         }
       }
     } else {
-      // Imposter gets points
+      // Imposter gets points if not caught with most votes
       const imposter = room.players.find(p => p.id === room.imposter);
       if (imposter) imposter.score += 2;
     }
@@ -335,7 +343,8 @@ io.on('connection', (socket) => {
       imposterId: room.imposter,
       imposterCaught,
       votes: room.votes,
-      players: room.players
+      players: room.players,
+      voteCounts // Include vote counts for display
     });
     
     // Check if game should continue

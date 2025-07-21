@@ -432,6 +432,16 @@ button:hover {
   100% { transform: scale(1.5); opacity: 0; }
 }
 
+/* Vote results styling */
+#results-container h4 {
+  margin-top: 15px;
+  color: var(--secondary);
+}
+
+#results-container div {
+  margin: 5px 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   #floating-scoreboard {
